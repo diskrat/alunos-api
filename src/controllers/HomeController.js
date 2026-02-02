@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import Aluno from '../models/Aluno';
 
 class HomeController {
