@@ -1,18 +1,18 @@
 /* eslint-disable class-methods-use-this */
 import Aluno from '../models/Aluno';
+import Foto from '../models/Foto';
 
 class AlunoController {
   async index(req, res) {
-    const alunos = await Aluno.findAll();
-    res.json(alunos.map((aluno) => ({
-      id: aluno.id,
-      nome: aluno.nome,
-      sobrenome: aluno.sobrenome,
-      email: aluno.email,
-      idade: aluno.idade,
-      peso: aluno.peso,
-      altura: aluno.altura,
-    })));
+    const alunos = await Aluno.findAll({
+      attributes: ['id', 'nome', 'sobrenome', 'email', 'idade', 'peso', 'altura'],
+      order: [['id', 'DESC'], [Foto, 'id']],
+      include: {
+        model: Foto,
+        attributes: ['url', 'filename'],
+      },
+    });
+    res.json(alunos);
   }
 
   async store(req, res) {
@@ -25,7 +25,7 @@ class AlunoController {
       });
     } catch (e) {
       return res.status(400).json({
-        errros: e.errors.map((err) => err.message),
+        errors: e.errors.map((err) => err.message),
       });
     }
   }
@@ -38,21 +38,24 @@ class AlunoController {
           errors: ['Faltando ID'],
         });
       }
-      const aluno = await Aluno.findByPk(id);
+      const aluno = await Aluno.findByPk(id, {
+        attributes: ['id', 'nome', 'sobrenome', 'email', 'idade', 'peso', 'altura'],
+        order: [['id', 'DESC'], [Foto, 'id']],
+        include: {
+          model: Foto,
+          attributes: ['url', 'filename'],
+        },
+      });
       if (!aluno) {
         return res.status(400).json({
           errors: ['Aluno nao existe'],
         });
       }
-      const {
-        nome, sobrenome, email, idade, peso, altura,
-      } = aluno;
-      return res.json({
-        nome, sobrenome, email, idade, peso, altura,
-      });
+
+      return res.json(aluno);
     } catch (e) {
       return res.status(400).json({
-        errros: e.errors.map((err) => err.message),
+        errors: e.errors.map((err) => err.message),
       });
     }
   }
@@ -76,7 +79,7 @@ class AlunoController {
       return res.json({ apagado: true });
     } catch (e) {
       return res.status(400).json({
-        errros: e.errors.map((err) => err.message),
+        errors: e.errors.map((err) => err.message),
       });
     }
   }
@@ -103,7 +106,7 @@ class AlunoController {
       });
     } catch (e) {
       return res.status(400).json({
-        errros: e.errors.map((err) => err.message),
+        errors: e.errors.map((err) => err.message),
       });
     }
   }
